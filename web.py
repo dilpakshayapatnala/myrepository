@@ -27,57 +27,51 @@ factors = {
 }
 
 # -----------------------
-# 🔹 Calculations
+# 🔘 Button to Show Results
 # -----------------------
-annual_electricity = electricity * 12
-annual_travel = travel * 52
-air_distance = air_travel_count * 1000
-lpg_emissions = factors["lpg"] * 14.2 * 6 if lpg_used == "yes" else 0
+if st.button("🔍 Show Results"):
+    # -----------------------
+    # 🔹 Calculations
+    # -----------------------
+    annual_electricity = electricity * 12
+    annual_travel = travel * 52
+    air_distance = air_travel_count * 1000
+    lpg_emissions = factors["lpg"] * 14.2 * 6 if lpg_used == "yes" else 0
 
-emissions = {
-    "Electricity": annual_electricity * factors["electricity"],
-    "Travel": annual_travel * factors["travel"],
-    "Air Travel": air_distance * factors["air_travel"],
-    "LPG": lpg_emissions
-}
+    emissions = {
+        "Electricity": annual_electricity * factors["electricity"],
+        "Travel": annual_travel * factors["travel"],
+        "Air Travel": air_distance * factors["air_travel"],
+        "LPG": lpg_emissions
+    }
 
-total = sum(emissions.values())
+    total = sum(emissions.values())
 
-# -----------------------
-# 🔹 Tabs for Output
-# -----------------------
-if electricity > 0 or travel > 0 or air_travel_count > 0 or lpg_used:
-    tab1, tab2 = st.tabs(["🌿 Calculator", "📊 Results"])
+    st.header("📉 Results")
+    st.subheader(f"🧮 Estimated Annual Carbon Footprint: `{total:.2f} kg CO₂`")
 
-    with tab1:
-        st.info("Your data has been recorded. Switch to the **Results** tab to see the analysis!")
+    # Tips
+    st.subheader("💡 Tips to Reduce Emissions:")
+    tips = [
+        "1. Turn off unused lights and appliances.",
+        "2. Prefer walking, cycling, or public transport.",
+        "3. Use efficient cooking practices to save LPG."
+    ]
+    if air_travel_count > 0:
+        tips.insert(2, "3. Reduce air travel when possible.")
+    for tip in tips[:4 if air_travel_count > 0 else 3]:
+        st.markdown(f"- {tip}")
 
-    with tab2:
-        st.header("📉 Results")
-        st.subheader(f"🧮 Estimated Annual Carbon Footprint: `{total:.2f} kg CO₂`")
+    # Chart
+    st.subheader("📊 Emissions Breakdown")
+    categories = list(emissions.keys())
+    values = list(emissions.values())
 
-        # Tips
-        st.subheader("💡 Tips to Reduce Emissions:")
-        tips = [
-            "1. Turn off unused lights and appliances.",
-            "2. Prefer walking, cycling, or public transport.",
-            "3. Use efficient cooking practices to save LPG."
-        ]
-        if air_travel_count > 0:
-            tips.insert(2, "3. Reduce air travel when possible.")
-        for tip in tips[:4 if air_travel_count > 0 else 3]:
-            st.markdown(f"- {tip}")
-
-        # Chart
-        st.subheader("📊 Emissions Breakdown")
-        categories = list(emissions.keys())
-        values = list(emissions.values())
-
-        fig, ax = plt.subplots(figsize=(7, 3))
-        ax.plot(categories, values, marker='o', linestyle='-', color='green')
-        ax.set_ylabel("kg CO₂/year")
-        ax.set_title("Emissions by Source")
-        ax.grid(True)
-        st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(7, 3))
+    ax.plot(categories, values, marker='o', linestyle='-', color='green')
+    ax.set_ylabel("kg CO₂/year")
+    ax.set_title("Emissions by Source")
+    ax.grid(True)
+    st.pyplot(fig)
 else:
-    st.warning("Please fill in at least one input to calculate your carbon footprint.")
+    st.info("Fill in the values above and click **Show Results** to view your carbon footprint.")
